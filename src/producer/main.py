@@ -26,6 +26,7 @@ while True:
         if random.random() < 0.1:
             temp = round(random.uniform(-5, 0), 2)
             print(f"⚠️  SIMULATING FAILURE on {truck}: {temp}C")
+            print(f"⚠️  SIMULATING FAILURE...", flush=True)
 
         payload = {
             "truck_id": truck,

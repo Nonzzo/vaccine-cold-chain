@@ -20,6 +20,8 @@ spec:
         env:
         - name: KAFKA_BROKER
           value: "vaccine-cluster-kafka-bootstrap.kafka.svc:9092"
+        - name: PYTHONUNBUFFERED 
+          value: "1"
 ---
 apiVersion: apps/v1
 kind: Deployment
