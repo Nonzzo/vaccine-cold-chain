@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vaccine-producer
+  namespace: kafka
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vaccine-producer
+  template:
+    metadata:
+      labels:
+        app: vaccine-producer
+    spec:
+      containers:
+      - name: producer
+        # THE MAGIC HAPPENS HERE:
+        image: ${DOCKER_REPO}/vaccine-producer:${IMAGE_TAG} 
+        env:
+        - name: KAFKA_BROKER
+          value: "vaccine-cluster-kafka-bootstrap.kafka.svc:9092"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vaccine-consumer
+  namespace: kafka
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vaccine-consumer
+  template:
+    metadata:
+      labels:
+        app: vaccine-consumer
+    spec:
+      containers:
+      - name: consumer
+        image: ${DOCKER_REPO}/vaccine-consumer:${IMAGE_TAG}
+        env:
+        - name: KAFKA_BROKER
+          value: "vaccine-cluster-kafka-bootstrap.kafka.svc:9092"

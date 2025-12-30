@@ -1,0 +1,44 @@
+*.tfvars
+.terraform/
+kubeconfig.yaml
+# Terraform
+terraform/.terraform/
+terraform/.terraform.lock.hcl
+terraform/terraform.tfvars
+terraform/terraform.tfvars.json
+terraform/*.tfplan
+terraform/kubeconfig.yaml
+terraform/crash.log
+terraform/override.tf
+terraform/override.tf.json
+**/.terraform.tfvars.swp
+
+# Local State
+*.tfstate
+*.tfstate.*
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Kubernetes
+kubeconfig.yaml
+kubeconfig-*.yaml
+aks_kube.yaml
+
+flatten.sh
+flattened-selected.md
+log1.txt
+log.txt
+
+
+# Logs
+*.log
+
+# Environment files
+.env
+.env.local

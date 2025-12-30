@@ -1,0 +1,77 @@
+name: Build and Deploy to AKS
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - 'src/**'
+      - '.github/workflows/**'
+
+env:
+  DOCKER_REPO: ${{ secrets.DOCKER_USERNAME }}
+  CLUSTER_NAME: aks-vaccine-cluster
+  RESOURCE_GROUP: rg-vaccine-platform
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # 1. Login to Docker Hub
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Set Image Tag (Short SHA)
+        id: vars
+        run: echo "SHA_SHORT=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+      # 2. Build & Push Images
+      - name: Build Producer
+        uses: docker/build-push-action@v5
+        with:
+          context: ./src/producer
+          push: true
+          tags: ${{ env.DOCKER_REPO }}/vaccine-producer:${{ steps.vars.outputs.SHA_SHORT }}
+
+      - name: Build Consumer
+        uses: docker/build-push-action@v5
+        with:
+          context: ./src/consumer
+          push: true
+          tags: ${{ env.DOCKER_REPO }}/vaccine-consumer:${{ steps.vars.outputs.SHA_SHORT }}
+
+      # 3. Login to Azure
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      # 4. Get AKS Credentials
+      - name: Get K8s Context
+        uses: azure/aks-set-context@v3
+        with:
+          resource-group: ${{ env.RESOURCE_GROUP }}
+          cluster-name: ${{ env.CLUSTER_NAME }}
+
+      # 5. Deploy (The "CD" Step)
+      # We use 'envsubst' to inject the dynamic image tag into the YAML before applying
+      - name: Deploy to AKS
+        run: |
+          # Export variables for envsubst
+          export IMAGE_TAG=${{ steps.vars.outputs.SHA_SHORT }}
+          export DOCKER_REPO=${{ env.DOCKER_REPO }}
+          
+          # We need to create a template file first. 
+          # (See Part 3 below for how to setup your Kubernetes YAML to support this)
+          envsubst < k8s/apps/deployment.tpl.yaml > k8s/apps/deployment.yaml
+          
+          kubectl apply -f k8s/apps/deployment.yaml
+          
+          # Force restart to pick up changes immediately if needed
+          kubectl rollout restart deployment/vaccine-producer -n kafka
+          kubectl rollout restart deployment/vaccine-consumer -n kafka
