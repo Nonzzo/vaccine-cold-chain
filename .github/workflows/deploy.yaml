@@ -65,6 +65,15 @@ jobs:
           # Export variables for envsubst
           export IMAGE_TAG=${{ steps.vars.outputs.SHA_SHORT }}
           export DOCKER_REPO=${{ env.DOCKER_REPO }}
+          export POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+          export POSTGRES_PASSWORD=${{ secrets.POSTGRES_USER }}
+
+          # 2. Generate the Secret Manifest
+          # This reads secrets.tpl.yaml, fills in the password, and creates a valid secrets.yaml
+          envsubst < k8s/common/secrets.tpl.yaml > k8s/common/secrets.yaml
+
+          # 3. Apply the Secret FIRST
+          kubectl apply -f k8s/common/secrets.yaml
           
           # We need to create a template file first. 
           # (See Part 3 below for how to setup your Kubernetes YAML to support this)
@@ -73,5 +82,7 @@ jobs:
           kubectl apply -f k8s/apps/deployment.yaml
           
           # Force restart to pick up changes immediately if needed
+
+          
           kubectl rollout restart deployment/vaccine-producer -n kafka
           kubectl rollout restart deployment/vaccine-consumer -n kafka

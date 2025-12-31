@@ -22,6 +22,23 @@ spec:
           value: "vaccine-cluster-kafka-bootstrap.kafka.svc:9092"
         - name: PYTHONUNBUFFERED 
           value: "1"
+        - name: DB_HOST
+          value: "postgres-service.kafka.svc.cluster.local"
+        - name: DB_NAME
+          valueFrom:
+            secretKeyRef:
+              name: vaccine-secrets
+              key: postgres-db
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: vaccine-secrets
+              key: postgres-user
+        - name: DB_PASS
+          valueFrom:
+            secretKeyRef:
+              name: vaccine-secrets
+              key: postgres-password
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -44,3 +61,20 @@ spec:
         env:
         - name: KAFKA_BROKER
           value: "vaccine-cluster-kafka-bootstrap.kafka.svc:9092"
+        - name: DB_HOST
+          value: "postgres-service.kafka.svc.cluster.local"
+        - name: DB_NAME
+          valueFrom:
+            secretKeyRef:
+              name: vaccine-secrets
+              key: postgres-db
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: vaccine-secrets
+              key: postgres-user
+        - name: DB_PASS
+          valueFrom:
+            secretKeyRef:
+              name: vaccine-secrets
+              key: postgres-password

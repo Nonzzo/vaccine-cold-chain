@@ -8,10 +8,10 @@ import numpy as np
 from prometheus_client import start_http_server, Counter, Gauge
 
 # Connection Config
-DB_HOST = "postgres-service.kafka.svc.cluster.local"
-DB_NAME = "vaccine_db"
-DB_USER = "vaccine_admin"
-DB_PASS = "SuperSecretPassword"
+DB_HOST = os.getenv("DB_HOST", "postgres-service.kafka.svc.cluster.local")
+DB_NAME = os.getenv("DB_NAME", "vaccine_db")
+DB_USER = os.getenv("DB_USER")
+DB_PASS = os.getenv("DB_PASS") 
 
 def get_db_connection():
     try:
@@ -33,7 +33,7 @@ DB_INSERT_COUNTER = Counter('vaccine_db_inserts_total', 'Rows written to DB')
 
 # ML Setup
 rng = np.random.RandomState(42)
-X_train = 0.3 * rng.randn(100, 1) - 20 
+X_train = rng.uniform(-20, -15, (100, 1))
 clf = IsolationForest(max_samples=100, random_state=rng)
 clf.fit(X_train)
 
