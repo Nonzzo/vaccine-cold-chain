@@ -66,7 +66,7 @@ jobs:
           export IMAGE_TAG=${{ steps.vars.outputs.SHA_SHORT }}
           export DOCKER_REPO=${{ env.DOCKER_REPO }}
           export POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
-          export POSTGRES_PASSWORD=${{ secrets.POSTGRES_USER }}
+          export POSTGRES_USER=${{ secrets.POSTGRES_USER }}
 
           # 2. Generate the Secret Manifest
           # This reads secrets.tpl.yaml, fills in the password, and creates a valid secrets.yaml
