@@ -75,11 +75,17 @@ jobs:
           # 3. Apply the Secret FIRST
           kubectl apply -f k8s/common/secrets.yaml
           
-          # We need to create a template file first. 
-          # (See Part 3 below for how to setup your Kubernetes YAML to support this)
+          # 4. Deploy Kafka Application
           envsubst < k8s/apps/deployment.tpl.yaml > k8s/apps/deployment.yaml
           
           kubectl apply -f k8s/apps/deployment.yaml
+
+          # 5. MONITORING 
+          # ---------------------------------------------------------
+          # The manifests include the 'monitoring' Namespace definition, 
+          # so we just apply the files directly.
+          kubectl apply -f k8s/monitoring/prometheus.yaml
+          kubectl apply -f k8s/monitoring/grafana.yaml
           
           # Force restart to pick up changes immediately if needed
 
