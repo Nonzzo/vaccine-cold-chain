@@ -19,8 +19,8 @@ spec:
     spec:
       containers:
       - name: producer
-        # THE MAGIC HAPPENS HERE:
         image: ${DOCKER_REPO}/vaccine-producer:${IMAGE_TAG} 
+        
         env:
         - name: KAFKA_BROKER
           value: "vaccine-cluster-kafka-bootstrap.kafka.svc:9092"

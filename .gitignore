@@ -12,6 +12,7 @@ terraform/crash.log
 terraform/override.tf
 terraform/override.tf.json
 **/.terraform.tfvars.swp
+log1.md
 
 # Local State
 *.tfstate
