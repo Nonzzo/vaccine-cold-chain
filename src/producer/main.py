@@ -3,6 +3,9 @@ import json
 import random
 import os
 from kafka import KafkaProducer
+from prometheus_client import start_http_server, Counter, Gauge
+
+start_http_server(8000) 
 
 # Config
 KAFKA_BROKER = os.getenv('KAFKA_BROKER', 'vaccine-cluster-kafka-bootstrap.kafka.svc:9092')
@@ -16,6 +19,12 @@ producer = KafkaProducer(
 truck_ids = ["TRUCK-001", "TRUCK-002", "TRUCK-003"]
 
 print(f"Starting Producer connected to {KAFKA_BROKER}")
+
+# Metrics
+ANOMALY_COUNTER = Counter('vaccine_anomaly_detected_total', 'Total temperature violations detected', ['truck_id'])
+TEMP_GAUGE = Gauge('truck_temperature_celsius', 'Current temperature', ['truck_id'])
+
+
 
 while True:
     for truck in truck_ids:
@@ -39,3 +48,4 @@ while True:
         producer.send(TOPIC, payload)
         
     time.sleep(2) # Send batch every 2 seconds
+

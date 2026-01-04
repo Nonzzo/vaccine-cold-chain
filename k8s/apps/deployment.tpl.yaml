@@ -20,6 +20,9 @@ spec:
       containers:
       - name: producer
         image: ${DOCKER_REPO}/vaccine-producer:${IMAGE_TAG} 
+        ports:                          # ← ADD THIS SECTION
+        - name: metrics
+          containerPort: 8000
         
         env:
         - name: KAFKA_BROKER
@@ -62,6 +65,9 @@ spec:
       containers:
       - name: consumer
         image: ${DOCKER_REPO}/vaccine-consumer:${IMAGE_TAG}
+        ports:                          # ← ADD THIS SECTION
+        - name: metrics
+          containerPort: 8000
         env:
         - name: KAFKA_BROKER
           value: "vaccine-cluster-kafka-bootstrap.kafka.svc:9092"

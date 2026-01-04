@@ -26,25 +26,33 @@ data:
           - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
             action: keep
             regex: true
-          # Use the pod's Prometheus port annotation
-          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_port]
+          
+          - source_labels: [__meta_kubernetes_pod_ip, __meta_kubernetes_pod_annotation_prometheus_io_port]
             action: replace
-            target_label: __address__
-            regex: ([^:]+)(?::\d+)?;(\d+)
+            regex: ([^:]+);(\d+)
             replacement: $1:$2
+            target_label: __address__
+          
           # Use custom path if specified
           - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
             action: replace
             target_label: __metrics_path__
             regex: (.+)
+          
           # Add pod name as label
           - source_labels: [__meta_kubernetes_pod_name]
             action: replace
             target_label: pod
+          
           # Add namespace as label
           - source_labels: [__meta_kubernetes_namespace]
             action: replace
             target_label: namespace
+          
+          # Add truck_id label if it exists
+          - source_labels: [__meta_kubernetes_pod_label_truck_id]
+            action: replace
+            target_label: truck_id
 
       # Scrape all Kubernetes nodes
       - job_name: 'kubernetes-nodes'
