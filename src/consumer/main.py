@@ -35,10 +35,7 @@ TEMP_GAUGE = Gauge('truck_temperature_celsius', 'Current temperature', ['truck_i
 
 DB_INSERT_COUNTER = Counter('vaccine_db_inserts_total', 'Rows written to DB')
 
-while True:
-    # Your processing
-    TEMP_GAUGE.labels(truck_id=truck_id).set(temp)
-    ANOMALY_COUNTER.labels(truck_id=truck_id).inc()
+
 
 # ML Setup
 rng = np.random.RandomState(42)
