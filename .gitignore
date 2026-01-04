@@ -13,7 +13,8 @@ terraform/override.tf
 terraform/override.tf.json
 **/.terraform.tfvars.swp
 log1.md
-log1.md
+debug-monitoring.sh
+
 
 # Local State
 *.tfstate
