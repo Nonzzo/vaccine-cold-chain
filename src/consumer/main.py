@@ -140,7 +140,7 @@ try:
             
             # 2. ML ANOMALY DETECTION
             pred = clf.predict([[temp]])
-            is_ml_anomaly = (pred[0] == -1)
+            is_ml_anomaly = bool(pred[0] == -1)
             
             # 3. THRESHOLD-BASED DETECTION
 
