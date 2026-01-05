@@ -7,8 +7,8 @@ from sklearn.ensemble import IsolationForest
 import numpy as np
 from prometheus_client import start_http_server, Counter, Gauge
 
+start_http_server(8000)
 
-start_http_server(8000) 
 # Connection Config
 DB_HOST = os.getenv("DB_HOST", "postgres-service.kafka.svc.cluster.local")
 DB_NAME = os.getenv("DB_NAME", "vaccine_db")
@@ -31,11 +31,8 @@ def get_db_connection():
 # Metrics
 ANOMALY_COUNTER = Counter('vaccine_anomaly_detected_total', 'Total temperature violations detected', ['truck_id'])
 TEMP_GAUGE = Gauge('truck_temperature_celsius', 'Current temperature', ['truck_id'])
-
-
 DB_INSERT_COUNTER = Counter('vaccine_db_inserts_total', 'Rows written to DB')
-
-
+MESSAGES_CONSUMED = Counter('vaccine_messages_consumed_total', 'Messages consumed', ['truck_id'])
 
 # ML Setup
 rng = np.random.RandomState(42)
@@ -66,18 +63,18 @@ for message in consumer:
         truck_id = data['truck_id']
         temp = data['temperature']
         
-        # 1. Update Metrics
         TEMP_GAUGE.labels(truck_id=truck_id).set(temp)
+        MESSAGES_CONSUMED.labels(truck_id=truck_id).inc()
         
-        # 2. ML Check
+        # ML Check
         pred = clf.predict([[temp]])
         is_anomaly = False
         if pred[0] == -1:
             print(f"🚨 ANOMALY: {truck_id} at {temp}°C")
-            ANOMALY_COUNTER.labels(truck_id=truck_id).inc()
+            ANOMALY_COUNTER.labels(truck_id=truck_id).inc()  # ← UPDATE METRIC
             is_anomaly = True
         
-        # 3. Write to DB (The Data Engineering Part)
+        # Write to DB (The Data Engineering Part)
         if conn:
             try:
                 cur = conn.cursor()
@@ -91,6 +88,5 @@ for message in consumer:
             except Exception as e:
                 print(f"DB Write Error: {e}")
                 conn.rollback()
-                # Reconnect strategy could go here
     except Exception as e:
         print(f"Processing Error: {e}")

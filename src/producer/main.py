@@ -5,7 +5,7 @@ import os
 from kafka import KafkaProducer
 from prometheus_client import start_http_server, Counter, Gauge
 
-start_http_server(8000) 
+start_http_server(8000)
 
 # Config
 KAFKA_BROKER = os.getenv('KAFKA_BROKER', 'vaccine-cluster-kafka-bootstrap.kafka.svc:9092')
@@ -23,8 +23,7 @@ print(f"Starting Producer connected to {KAFKA_BROKER}")
 # Metrics
 ANOMALY_COUNTER = Counter('vaccine_anomaly_detected_total', 'Total temperature violations detected', ['truck_id'])
 TEMP_GAUGE = Gauge('truck_temperature_celsius', 'Current temperature', ['truck_id'])
-
-
+MESSAGES_PRODUCED = Counter('vaccine_messages_produced_total', 'Total messages produced', ['truck_id'])
 
 while True:
     for truck in truck_ids:
@@ -32,10 +31,12 @@ while True:
         temp = round(random.uniform(-20, -15), 2)
         
         # 10% chance of Cooling Failure (Temp rises to -5)
+        is_anomaly = False
         if random.random() < 0.1:
             temp = round(random.uniform(-5, 0), 2)
-            print(f"⚠️  SIMULATING FAILURE on {truck}: {temp}C")
-            print(f"⚠️  SIMULATING FAILURE...", flush=True)
+            print(f"⚠️  SIMULATING FAILURE on {truck}: {temp}C", flush=True)
+            ANOMALY_COUNTER.labels(truck_id=truck).inc()  # ← UPDATE METRIC
+            is_anomaly = True
 
         payload = {
             "truck_id": truck,
@@ -47,5 +48,7 @@ while True:
         
         producer.send(TOPIC, payload)
         
-    time.sleep(2) # Send batch every 2 seconds
-
+        TEMP_GAUGE.labels(truck_id=truck).set(temp)
+        MESSAGES_PRODUCED.labels(truck_id=truck).inc()
+        
+    time.sleep(2)
