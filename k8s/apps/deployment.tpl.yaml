@@ -27,6 +27,10 @@ spec:
         env:
         - name: KAFKA_BROKER
           value: "vaccine-cluster-kafka-bootstrap.kafka.svc:9092"
+        - name: NUM_TRUCKS
+          value: "50"  
+        - name: ANOMALY_RATE
+          value: "0.1" #10% chance 
         - name: PYTHONUNBUFFERED 
           value: "1"
         - name: DB_HOST
