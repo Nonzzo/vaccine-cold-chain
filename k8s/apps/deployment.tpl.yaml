@@ -65,6 +65,10 @@ spec:
     metadata:
       labels:
         app: vaccine-consumer
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8000"
+        prometheus.io/path: "/metrics"
     spec:
       containers:
       - name: consumer
